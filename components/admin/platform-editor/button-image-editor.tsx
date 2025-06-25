@@ -121,7 +121,7 @@ export default function ButtonImageEditor() {
     async function loadConfig() {
       try {
         const res = await fetch(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/platform-config`,
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/platform-config`,
           { cache: "no-store" }
         );
         if (!res.ok) throw new Error("No hay configuración en backend");
