@@ -117,7 +117,27 @@ export default function ButtonImageEditor() {
 
   const imageContainerRef = useRef<HTMLDivElement>(null);
 
-  // Actualizar el código JSON cuando cambia la configuración
+  useEffect(() => {
+    async function loadConfig() {
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/platform-config`,
+          { cache: "no-store" }
+        );
+        if (!res.ok) throw new Error("No hay configuración en backend");
+        const data: PlatformConfig = await res.json();
+        setConfig(data);
+        setHistory([data]);
+        setHistoryIndex(0);
+      } catch (err) {
+        console.error("No se pudo cargar config:", err);
+        // dejamos initialConfig
+      }
+    }
+    loadConfig();
+  }, []);
+
+  // Actualizar jsonCode al cambiar config
   useEffect(() => {
     setJsonCode(JSON.stringify(config, null, 2));
   }, [config]);
@@ -911,7 +931,7 @@ export default function ButtonImageEditor() {
                 )}
               </CardContent>
             </Card>
-            // justo antes de cerrar TabsContent value="editor"
+
             <div className='flex justify-end mt-4'>
               <Button
                 variant='default'
