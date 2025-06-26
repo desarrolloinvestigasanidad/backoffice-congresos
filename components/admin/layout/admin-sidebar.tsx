@@ -33,13 +33,13 @@ const menuItems = [
       { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
       {
         name: "Congresos",
-        href: "/congresos",
+        href: "/dashboard/congresos",
         icon: Calendar,
         badge: "3",
       },
       {
         name: "Editor Botones",
-        href: "/editor-botones",
+        href: "/dashboard/editor-botones",
         icon: ImageIcon,
       },
     ],
@@ -47,31 +47,40 @@ const menuItems = [
   {
     title: "Gestión",
     items: [
-      { name: "Usuarios", href: "/usuarios", icon: Users, badge: "12" },
+      {
+        name: "Usuarios",
+        href: "/dashboard/usuarios",
+        icon: Users,
+        badge: "12",
+      },
       {
         name: "Comunicaciones",
-        href: "/comunicaciones",
+        href: "/dashboard/communications",
         icon: FileText,
         badge: "23",
       },
-      { name: "Pagos", href: "/pagos", icon: CreditCard },
-      { name: "Certificados", href: "/certificados", icon: Award },
+      { name: "Pagos", href: "/dashboard/pagos", icon: CreditCard },
+      { name: "Certificados", href: "/dashboard/certificados", icon: Award },
     ],
   },
   {
     title: "Analytics",
     items: [
-      { name: "Reportes", href: "/reportes", icon: BarChart3 },
-      { name: "Notificaciones", href: "/notificaciones", icon: Bell },
+      { name: "Reportes", href: "/dashboard/reportes", icon: BarChart3 },
+      { name: "Notificaciones", href: "/dashboard/notificaciones", icon: Bell },
     ],
   },
   {
     title: "Sistema",
     items: [
-      { name: "Configuración", href: "/configuracion", icon: Settings },
-      { name: "Permisos", href: "/permisos", icon: Shield },
-      { name: "Base de Datos", href: "/database", icon: Database },
-      { name: "Soporte", href: "/soporte", icon: HelpCircle },
+      {
+        name: "Configuración",
+        href: "/dashboard/configuracion",
+        icon: Settings,
+      },
+      { name: "Permisos", href: "/dashboard/permisos", icon: Shield },
+      { name: "Base de Datos", href: "/dashboard/database", icon: Database },
+      { name: "Soporte", href: "/dashboard/soporte", icon: HelpCircle },
     ],
   },
 ];
