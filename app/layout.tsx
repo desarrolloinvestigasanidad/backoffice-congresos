@@ -1,6 +1,7 @@
 import type React from "react";
 import type { Metadata } from "next";
 import { ThemeProvider } from "@/components/theme-provider";
+import { AuthProvider } from "@/context/AuthContext"; // <-- 1. IMPORTAMOS EL PROVIDER
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -21,7 +22,10 @@ export default function RootLayout({
           defaultTheme='light'
           enableSystem
           disableTransitionOnChange>
-          <div className='min-h-screen bg-background'>{children}</div>
+          {/*-- 2. ENVOLVEMOS LA APLICACIÓN CON EL AUTHPROVIDER --*/}
+          <AuthProvider>
+            <div className='min-h-screen bg-background'>{children}</div>
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>

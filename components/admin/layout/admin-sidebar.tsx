@@ -49,7 +49,7 @@ const menuItems = [
     items: [
       {
         name: "Usuarios",
-        href: "/dashboard/usuarios",
+        href: "/dashboard/users",
         icon: Users,
         badge: "12",
       },

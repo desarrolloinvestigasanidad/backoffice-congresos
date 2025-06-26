@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -21,15 +21,36 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { X, Plus, Loader2, AlertCircle } from "lucide-react";
+import { X, Loader2, AlertCircle } from "lucide-react";
 
-interface CongressFormProps {
-  onClose: () => void;
-  onSave: () => void; // Esta función se llamará para refrescar la lista
+// Interfaz para los datos del congreso, necesaria para las props
+interface Congress {
+  id: string | number;
+  title: string;
+  description: string;
+  status: "draft" | "upcoming" | "active" | "finished";
+  startDate: string;
+  endDate: string;
+  location: string;
+  maxParticipants: number;
+  category: string;
+  organizer: string;
 }
 
-export function CongressForm({ onClose, onSave }: CongressFormProps) {
-  // Estado para los datos del formulario
+interface CongressFormProps {
+  congressToEdit?: Congress | null;
+  onClose: () => void;
+  onSave: () => void;
+}
+
+export function CongressForm({
+  onClose,
+  onSave,
+  congressToEdit,
+}: CongressFormProps) {
+  const isEditMode = !!congressToEdit;
+
+  // El estado inicial del formulario está vacío
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -42,7 +63,30 @@ export function CongressForm({ onClose, onSave }: CongressFormProps) {
     status: "draft",
   });
 
-  // Estado para la carga y los errores
+  // Este efecto se ejecuta si se pasa un congreso para editar, y rellena el formulario
+  useEffect(() => {
+    if (isEditMode && congressToEdit) {
+      const formattedStartDate = congressToEdit.startDate
+        ? new Date(congressToEdit.startDate).toISOString().split("T")[0]
+        : "";
+      const formattedEndDate = congressToEdit.endDate
+        ? new Date(congressToEdit.endDate).toISOString().split("T")[0]
+        : "";
+
+      setFormData({
+        title: congressToEdit.title,
+        description: congressToEdit.description,
+        startDate: formattedStartDate,
+        endDate: formattedEndDate,
+        location: congressToEdit.location,
+        maxParticipants: congressToEdit.maxParticipants || 0,
+        category: congressToEdit.category || "",
+        organizer: congressToEdit.organizer || "",
+        status: congressToEdit.status,
+      });
+    }
+  }, [congressToEdit, isEditMode]);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
 
@@ -52,19 +96,24 @@ export function CongressForm({ onClose, onSave }: CongressFormProps) {
     setApiError(null);
 
     try {
+      // Usamos el token que has puesto para pruebas. En producción, debería venir de un contexto de autenticación.
       const token =
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjQ0NTk5MDg1UyIsInN1YiI6IjQ0NTk5MDg1UyIsInJvbGVJZCI6MiwiaWF0IjoxNzUwOTMxNDMzLCJleHAiOjE3NTEwMTc4MzN9.Khh7aiJ_TmW6hVhFKStEErVtDja8LD-Zi6QxhLQenkI"; // O "authToken" según cómo lo guardes
-      if (!token) {
-        throw new Error("No se encontró el token de autenticación.");
-      }
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjQ0NTk5MDg1UyIsInN1YiI6IjQ0NTk5MDg1UyIsInJvbGVJZCI6MiwiaWF0IjoxNzUwOTMxNDMzLCJleHAiOjE3NTEwMTc4MzN9.Khh7aiJ_TmW6hVhFKStEErVtDja8LD-Zi6QxhLQenkI";
+      if (!token) throw new Error("No se encontró el token de autenticación.");
 
-      const apiUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL}/congresses`;
+      const apiUrl = isEditMode
+        ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/congresses/${congressToEdit?.id}`
+        : `${process.env.NEXT_PUBLIC_BACKEND_URL}/congresses`;
+
+      const method = isEditMode ? "PUT" : "POST";
+
       const bodyToSend = {
         ...formData,
         maxParticipants: Number(formData.maxParticipants) || 0,
       };
+
       const response = await fetch(apiUrl, {
-        method: "POST",
+        method: method,
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
@@ -74,15 +123,16 @@ export function CongressForm({ onClose, onSave }: CongressFormProps) {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || "Error al crear el congreso");
+        throw new Error(
+          errorData.message ||
+            `Error al ${isEditMode ? "actualizar" : "crear"} el congreso`
+        );
       }
 
-      // Si todo va bien, llamamos a onSave() y cerramos el formulario
-      onSave();
-      onClose();
+      onSave(); // Llama a la función para refrescar la lista
+      onClose(); // Cierra el formulario
     } catch (error: any) {
       setApiError(error.message);
-      console.error(error);
     } finally {
       setIsSubmitting(false);
     }
@@ -94,9 +144,13 @@ export function CongressForm({ onClose, onSave }: CongressFormProps) {
         <CardHeader>
           <div className='flex items-center justify-between'>
             <div>
-              <CardTitle>Nuevo Congreso</CardTitle>
+              <CardTitle>
+                {isEditMode ? "Editar Congreso" : "Nuevo Congreso"}
+              </CardTitle>
               <CardDescription>
-                Configura todos los detalles del congreso
+                {isEditMode
+                  ? `Editando los detalles de "${congressToEdit?.title}"`
+                  : "Configura todos los detalles del congreso"}
               </CardDescription>
             </div>
             <Button
@@ -108,10 +162,8 @@ export function CongressForm({ onClose, onSave }: CongressFormProps) {
             </Button>
           </div>
         </CardHeader>
-
         <CardContent>
           <form onSubmit={handleSubmit}>
-            {/* Mensaje de error de la API */}
             {apiError && (
               <div className='mb-4 flex items-center gap-2 rounded-lg border border-red-300 bg-red-50 p-3 text-sm text-red-800'>
                 <AlertCircle className='h-5 w-5' />
@@ -240,7 +292,13 @@ export function CongressForm({ onClose, onSave }: CongressFormProps) {
                 {isSubmitting && (
                   <Loader2 className='mr-2 h-4 w-4 animate-spin' />
                 )}
-                {isSubmitting ? "Creando..." : "Crear Congreso"}
+                {isSubmitting
+                  ? isEditMode
+                    ? "Guardando..."
+                    : "Creando..."
+                  : isEditMode
+                  ? "Guardar Cambios"
+                  : "Crear Congreso"}
               </Button>
             </div>
           </form>
