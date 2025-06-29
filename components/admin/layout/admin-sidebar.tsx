@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -25,6 +25,7 @@ import {
   LogOut,
   Home,
 } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 
 const menuItems = [
   {
@@ -88,7 +89,15 @@ const menuItems = [
 export default function AdminSidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const pathname = usePathname();
+  // --- 3. OBTENEMOS LAS FUNCIONES QUE NECESITAMOS ---
+  const { logout } = useAuth();
+  const router = useRouter();
 
+  // --- 4. CREAMOS LA FUNCIÓN PARA MANEJAR EL LOGOUT ---
+  const handleLogout = () => {
+    logout(); // Esto borra el token de localStorage y del estado
+    router.push("/login"); // Redirigimos al usuario a la página de login
+  };
   return (
     <div
       className={cn(
@@ -162,9 +171,10 @@ export default function AdminSidebar() {
       {/* Footer */}
       <div className='p-4 border-t border-gray-200'>
         <Button
+          onClick={handleLogout}
           variant='ghost'
           className={cn(
-            "w-full justify-start gap-2 text-red-600 hover:text-red-700 hover:bg-red-50",
+            "w-full justify-start gap-2 text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-500 dark:hover:bg-red-900/20 dark:hover:text-red-400",
             collapsed && "px-2"
           )}>
           <LogOut className='h-4 w-4' />
