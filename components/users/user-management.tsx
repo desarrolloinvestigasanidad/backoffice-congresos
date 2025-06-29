@@ -34,7 +34,6 @@ interface User {
   lastName: string;
   email: string;
   roleId: number;
-  // Puedes añadir cualquier otro campo que devuelva tu API y quieras usar
 }
 
 // --- SUB-COMPONENTE PARA RENDERIZAR LA LISTA ---
@@ -117,7 +116,8 @@ function UserList({
                     <DropdownMenuLabel>Acciones</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild className='cursor-pointer'>
-                      <Link href={`/dashboard/users/${user.id}`}>
+                      {/* La ruta correcta para los detalles de usuario */}
+                      <Link href={`/users/${user.id}`}>
                         <Eye className='mr-2 h-4 w-4' />
                         Ver detalles
                       </Link>

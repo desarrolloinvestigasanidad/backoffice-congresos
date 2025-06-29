@@ -1,8 +1,8 @@
 "use client";
 
 import type React from "react";
-import { useState, useEffect } from "react";
-import { useAuth } from "@/context/AuthContext";
+import { useState } from "react";
+import { useAuth } from "@/context/AuthContext"; // <-- 1. IMPORTAMOS EL HOOK DE AUTENTICACIÓN
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -22,8 +22,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Loader2, AlertCircle, X } from "lucide-react";
-
-// Interfaz para que el formulario sepa qué datos esperar
 interface User {
   id: string;
   firstName: string;
@@ -31,39 +29,34 @@ interface User {
   email: string;
   roleId: number;
 }
-
 interface UserFormProps {
-  userToEdit?: User | null; // <-- NUEVA PROPIEDAD para recibir el usuario a editar
+  userToEdit?: User | null;
   onClose: () => void;
   onSave: () => void;
 }
 
-export function UserForm({ onClose, onSave, userToEdit }: UserFormProps) {
-  const { token } = useAuth();
-  const isEditMode = !!userToEdit;
+// He movido la interfaz aquí para que el componente sea autocontenido
+interface UserFormData {
+  id: string;
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+  roleId: string;
+}
 
-  const [formData, setFormData] = useState({
+export function UserForm({ onClose, onSave }: UserFormProps) {
+  // Obtenemos el token del admin logueado desde el contexto
+  const { token } = useAuth();
+
+  const [formData, setFormData] = useState<UserFormData>({
     id: "",
     email: "",
-    password: "", // La contraseña siempre empieza vacía por seguridad
+    password: "",
     firstName: "",
     lastName: "",
-    roleId: "1",
+    roleId: "1", // Por defecto, creamos un Admin
   });
-
-  // --- NUEVO: useEffect que rellena el formulario si estamos en modo edición ---
-  useEffect(() => {
-    if (isEditMode && userToEdit) {
-      setFormData({
-        id: userToEdit.id,
-        email: userToEdit.email,
-        password: "", // Dejamos la contraseña en blanco
-        firstName: userToEdit.firstName,
-        lastName: userToEdit.lastName,
-        roleId: String(userToEdit.roleId),
-      });
-    }
-  }, [userToEdit, isEditMode]);
 
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -82,40 +75,34 @@ export function UserForm({ onClose, onSave, userToEdit }: UserFormProps) {
     setError(null);
 
     try {
-      if (!token) throw new Error("No estás autenticado.");
-
-      // La URL y el método cambian si es edición o creación
-      const apiUrl = isEditMode
-        ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/${userToEdit.id}` // <-- Ruta para actualizar
-        : `${process.env.NEXT_PUBLIC_BACKEND_URL}/users`; // <-- Ruta para crear (usando userController)
-
-      const method = isEditMode ? "PUT" : "POST";
-
-      const bodyToSend: any = {
-        ...formData,
-        roleId: parseInt(formData.roleId, 10),
-      };
-
-      // Si estamos editando y no se ha introducido una nueva contraseña, la eliminamos del envío
-      // para no sobreescribir la existente en el backend con un string vacío.
-      if (isEditMode && !formData.password) {
-        delete bodyToSend.password;
+      // Usamos el token que viene del contexto de autenticación
+      if (!token) {
+        throw new Error("No estás autenticado para realizar esta acción.");
       }
 
-      const response = await fetch(apiUrl, {
-        method,
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(bodyToSend),
-      });
+      // --- CAMBIO CLAVE: Apuntamos a la ruta correcta para crear usuarios como admin ---
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/users`, // ANTES: /auth/register
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`, // Token del admin que crea al usuario
+          },
+          body: JSON.stringify({
+            ...formData,
+            roleId: parseInt(formData.roleId, 10),
+          }),
+        }
+      );
 
       const data = await response.json();
-      if (!response.ok) throw new Error(data.message || "Ocurrió un error.");
+      if (!response.ok) {
+        throw new Error(data.message || "Error al registrar el usuario.");
+      }
 
-      onSave();
-      onClose();
+      onSave(); // Llama a la función para refrescar la lista
+      onClose(); // Cierra el modal
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -128,9 +115,7 @@ export function UserForm({ onClose, onSave, userToEdit }: UserFormProps) {
       <Card className='w-full max-w-md'>
         <CardHeader>
           <div className='flex justify-between items-center'>
-            <CardTitle>
-              {isEditMode ? "Editar Usuario" : "Añadir Nuevo Usuario"}
-            </CardTitle>
+            <CardTitle>Añadir Nuevo Usuario</CardTitle>
             <Button
               variant='ghost'
               size='icon'
@@ -140,38 +125,77 @@ export function UserForm({ onClose, onSave, userToEdit }: UserFormProps) {
             </Button>
           </div>
           <CardDescription>
-            {isEditMode
-              ? "Modifica los datos del usuario."
-              : "Rellena los campos para crear una nueva cuenta."}
+            Rellena los campos obligatorios para crear una nueva cuenta.
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent className='space-y-4'>
-            {/* ... (resto del formulario) ... */}
+            {error && (
+              <div className='flex items-center gap-2 rounded-lg border border-red-300 bg-red-50 p-3 text-sm text-red-800'>
+                <AlertCircle className='h-5 w-5 flex-shrink-0' />
+                {error}
+              </div>
+            )}
+            <div className='grid grid-cols-2 gap-4'>
+              <div className='space-y-2'>
+                <Label htmlFor='firstName'>Nombre</Label>
+                <Input
+                  id='firstName'
+                  value={formData.firstName}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+              <div className='space-y-2'>
+                <Label htmlFor='lastName'>Apellidos</Label>
+                <Input
+                  id='lastName'
+                  value={formData.lastName}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+            </div>
             <div className='space-y-2'>
               <Label htmlFor='id'>DNI / NIE</Label>
-              {/* En modo edición, el DNI no se puede cambiar */}
               <Input
                 id='id'
                 value={formData.id}
                 onChange={handleChange}
                 required
-                disabled={isEditMode}
               />
             </div>
-            {/* ... */}
+            <div className='space-y-2'>
+              <Label htmlFor='email'>Email</Label>
+              <Input
+                id='email'
+                type='email'
+                value={formData.email}
+                onChange={handleChange}
+                required
+              />
+            </div>
             <div className='space-y-2'>
               <Label htmlFor='password'>Contraseña</Label>
-              {/* En modo edición, este campo es opcional */}
               <Input
                 id='password'
                 type='password'
                 value={formData.password}
                 onChange={handleChange}
-                placeholder={
-                  isEditMode ? "Dejar en blanco para no cambiar" : ""
-                }
+                required
               />
+            </div>
+            <div className='space-y-2'>
+              <Label htmlFor='roleId'>Rol de Usuario</Label>
+              <Select value={formData.roleId} onValueChange={handleRoleChange}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value='1'>Administrador</SelectItem>
+                  <SelectItem value='2'>Cliente</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </CardContent>
           <CardFooter className='flex justify-end gap-2'>
@@ -182,11 +206,11 @@ export function UserForm({ onClose, onSave, userToEdit }: UserFormProps) {
               disabled={isSubmitting}>
               Cancelar
             </Button>
-            <Button type='submit' disabled={isSubmitting}>
+            <Button type='submit' className='w-full' disabled={isSubmitting}>
               {isSubmitting && (
                 <Loader2 className='mr-2 h-4 w-4 animate-spin' />
               )}
-              {isEditMode ? "Guardar Cambios" : "Añadir Usuario"}
+              Añadir Usuario
             </Button>
           </CardFooter>
         </form>
