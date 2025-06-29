@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useAuth } from "@/context/AuthContext"; // <-- 1. IMPORTAMOS EL HOOK
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus, Search } from "lucide-react";
@@ -8,7 +9,6 @@ import { CongressList } from "./congress-list";
 import { CongressForm } from "./congress-form";
 import { CongressStats } from "./congress-stats";
 
-// La interfaz debe estar definida o importada aquí para que todo funcione
 interface Congress {
   id: string | number;
   title: string;
@@ -24,31 +24,42 @@ interface Congress {
 }
 
 export function CongressManagement() {
-  // --- Estados para la UI y la interacción ---
+  // --- 2. OBTENEMOS EL TOKEN DINÁMICO DEL CONTEXTO ---
+  const { token } = useAuth();
+
   const [searchTerm, setSearchTerm] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [editingCongress, setEditingCongress] = useState<Congress | null>(null);
-
-  // --- Estados para los datos, ahora centralizados en este componente padre ---
   const [congresses, setCongresses] = useState<Congress[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Función para obtener los datos, se puede llamar para recargar
   const fetchCongresses = async () => {
+    // Solo intentamos cargar si hay un token
+    if (!token) {
+      setIsLoading(false);
+      setError("No autenticado. Por favor, inicia sesión.");
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
     try {
-      // Reemplaza esto con tu método de obtención de token (ej: localStorage.getItem('token'))
-      const token =
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjQ0NTk5MDg1UyIsInN1YiI6IjQ0NTk5MDg1UyIsInJvbGVJZCI6MiwiaWF0IjoxNzUwOTMxNDMzLCJleHAiOjE3NTEwMTc4MzN9.Khh7aiJ_TmW6hVhFKStEErVtDja8LD-Zi6QxhLQenkI";
+      // --- 3. USAMOS EL TOKEN DEL CONTEXTO ---
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/congresses`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      if (!response.ok) throw new Error("No se pudieron cargar los congresos.");
+      if (!response.ok) {
+        // Si el token ha caducado, la API devolverá 401
+        if (response.status === 401)
+          throw new Error(
+            "Tu sesión ha caducado. Por favor, vuelve a iniciar sesión."
+          );
+        throw new Error("No se pudieron cargar los congresos.");
+      }
       const data = await response.json();
       setCongresses(data);
     } catch (err: any) {
@@ -59,12 +70,11 @@ export function CongressManagement() {
     }
   };
 
-  // Obtiene los datos la primera vez que se carga el componente
+  // --- 4. HACEMOS QUE EL useEffect DEPENDA DEL TOKEN ---
+  // Así, solo se ejecutará cuando el token esté disponible.
   useEffect(() => {
     fetchCongresses();
-  }, []);
-
-  // --- Funciones de manejo de acciones ---
+  }, [token]);
 
   const handleEdit = (congress: Congress) => {
     setEditingCongress(congress);
@@ -79,16 +89,19 @@ export function CongressManagement() {
   const handleSave = () => {
     setShowForm(false);
     setEditingCongress(null);
-    fetchCongresses(); // Vuelve a cargar los datos para ver los cambios
+    fetchCongresses(); // Vuelve a cargar los datos
   };
 
   const handleDelete = async (congressId: string | number) => {
     if (!window.confirm("¿Estás seguro de que quieres eliminar este congreso?"))
       return;
+    if (!token) {
+      alert("Tu sesión ha caducado. Por favor, vuelve a iniciar sesión.");
+      return;
+    }
 
     try {
-      const token =
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjQ0NTk5MDg1UyIsInN1YiI6IjQ0NTk5MDg1UyIsInJvbGVJZCI6MiwiaWF0IjoxNzUwOTMxNDMzLCJleHAiOjE3NTEwMTc4MzN9.Khh7aiJ_TmW6hVhFKStEErVtDja8LD-Zi6QxhLQenkI";
+      // --- 3. USAMOS EL TOKEN DEL CONTEXTO ---
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/congresses/${congressId}`,
         {
@@ -100,7 +113,6 @@ export function CongressManagement() {
         const errorData = await response.json();
         throw new Error(errorData.message || "Error al eliminar el congreso.");
       }
-      // Actualiza el estado local para reflejar la eliminación al instante
       setCongresses((prev) => prev.filter((c) => c.id !== congressId));
     } catch (err: any) {
       console.error("Error al eliminar:", err);
@@ -130,10 +142,8 @@ export function CongressManagement() {
         </Button>
       </div>
 
-      {/* El componente de estadísticas ahora recibe los datos reales */}
       <CongressStats congresses={congresses} />
 
-      {/* La lista ahora es un componente más simple que recibe todo como props */}
       <CongressList
         congresses={congresses}
         isLoading={isLoading}
@@ -143,7 +153,6 @@ export function CongressManagement() {
         onDelete={handleDelete}
       />
 
-      {/* El formulario se renderiza condicionalmente */}
       {showForm && (
         <CongressForm
           onClose={handleCloseForm}
