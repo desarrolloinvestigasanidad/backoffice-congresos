@@ -1,16 +1,25 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Award, Download, Eye, Share2, Calendar, Clock, Users, FileText } from "lucide-react"
-import PlatformHeader from "@/components/platform/platform-header"
-import CertificatePreview from "./certificate-preview"
-import CertificateGenerator from "./certificate-generator"
-import CertificateTemplates from "./certificate-templates"
-import CertificateHistory from "./certificate-history"
+import { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Award,
+  Download,
+  Eye,
+  Share2,
+  Calendar,
+  Clock,
+  Users,
+  FileText,
+} from "lucide-react";
+import PlatformHeader from "@/components/platform/platform-header";
+import CertificatePreview from "./certificate-preview";
+import CertificateGenerator from "./certificate-generator";
+import CertificateTemplates from "./certificate-templates";
+import CertificateHistory from "./certificate-history";
 
 // Datos simulados que vendrían del backend
 const certificatesData = {
@@ -58,108 +67,116 @@ const certificatesData = {
       verificationCode: "CERT-2024-003",
     },
   ],
-}
+};
 
 export default function CertificatesDashboard() {
-  const [selectedCertificate, setSelectedCertificate] = useState<any>(null)
-  const [showPreview, setShowPreview] = useState(false)
+  const [selectedCertificate, setSelectedCertificate] = useState<any>(null);
+  const [showPreview, setShowPreview] = useState(false);
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case "emitido":
-        return "bg-green-100 text-green-800"
+        return "bg-green-100 text-green-800";
       case "listo":
-        return "bg-blue-100 text-blue-800"
+        return "bg-blue-100 text-blue-800";
       case "pendiente":
-        return "bg-yellow-100 text-yellow-800"
+        return "bg-yellow-100 text-yellow-800";
       default:
-        return "bg-gray-100 text-gray-800"
+        return "bg-gray-100 text-gray-800";
     }
-  }
+  };
 
   const getTypeColor = (type: string) => {
     switch (type) {
       case "participacion":
-        return "bg-purple-100 text-purple-800"
+        return "bg-purple-100 text-purple-800";
       case "ponencia":
-        return "bg-orange-100 text-orange-800"
+        return "bg-orange-100 text-orange-800";
       case "asistencia":
-        return "bg-cyan-100 text-cyan-800"
+        return "bg-cyan-100 text-cyan-800";
       default:
-        return "bg-gray-100 text-gray-800"
+        return "bg-gray-100 text-gray-800";
     }
-  }
+  };
 
   return (
-    <div className="relative min-h-screen bg-background">
-      <PlatformHeader />
-
-      <div className="container px-4 py-8 md:px-6 max-w-7xl mx-auto">
+    <div className='relative min-h-screen bg-background'>
+      <div className='container px-4 py-8 md:px-6 max-w-7xl mx-auto'>
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 bg-primary/10 rounded-lg">
-              <Award className="h-6 w-6 text-primary" />
+        <div className='mb-8'>
+          <div className='flex items-center gap-3 mb-4'>
+            <div className='p-2 bg-primary/10 rounded-lg'>
+              <Award className='h-6 w-6 text-primary' />
             </div>
             <div>
-              <h1 className="text-3xl font-bold">Certificados</h1>
-              <p className="text-muted-foreground">Genera y descarga tus certificados de participación</p>
+              <h1 className='text-3xl font-bold'>Certificados</h1>
+              <p className='text-muted-foreground'>
+                Genera y descarga tus certificados de participación
+              </p>
             </div>
           </div>
 
           {/* Stats Cards */}
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-4'>
             <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-blue-100 rounded-lg">
-                    <FileText className="h-5 w-5 text-blue-600" />
+              <CardContent className='p-4'>
+                <div className='flex items-center gap-3'>
+                  <div className='p-2 bg-blue-100 rounded-lg'>
+                    <FileText className='h-5 w-5 text-blue-600' />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Total</p>
-                    <p className="text-2xl font-bold">{certificatesData.stats.total}</p>
+                    <p className='text-sm text-muted-foreground'>Total</p>
+                    <p className='text-2xl font-bold'>
+                      {certificatesData.stats.total}
+                    </p>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
             <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-green-100 rounded-lg">
-                    <Award className="h-5 w-5 text-green-600" />
+              <CardContent className='p-4'>
+                <div className='flex items-center gap-3'>
+                  <div className='p-2 bg-green-100 rounded-lg'>
+                    <Award className='h-5 w-5 text-green-600' />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Emitidos</p>
-                    <p className="text-2xl font-bold">{certificatesData.stats.emitidos}</p>
+                    <p className='text-sm text-muted-foreground'>Emitidos</p>
+                    <p className='text-2xl font-bold'>
+                      {certificatesData.stats.emitidos}
+                    </p>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
             <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-orange-100 rounded-lg">
-                    <Clock className="h-5 w-5 text-orange-600" />
+              <CardContent className='p-4'>
+                <div className='flex items-center gap-3'>
+                  <div className='p-2 bg-orange-100 rounded-lg'>
+                    <Clock className='h-5 w-5 text-orange-600' />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Horas</p>
-                    <p className="text-2xl font-bold">{certificatesData.stats.horas}</p>
+                    <p className='text-sm text-muted-foreground'>Horas</p>
+                    <p className='text-2xl font-bold'>
+                      {certificatesData.stats.horas}
+                    </p>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
             <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-purple-100 rounded-lg">
-                    <Users className="h-5 w-5 text-purple-600" />
+              <CardContent className='p-4'>
+                <div className='flex items-center gap-3'>
+                  <div className='p-2 bg-purple-100 rounded-lg'>
+                    <Users className='h-5 w-5 text-purple-600' />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Categorías</p>
-                    <p className="text-2xl font-bold">{certificatesData.stats.categorias}</p>
+                    <p className='text-sm text-muted-foreground'>Categorías</p>
+                    <p className='text-2xl font-bold'>
+                      {certificatesData.stats.categorias}
+                    </p>
                   </div>
                 </div>
               </CardContent>
@@ -168,67 +185,80 @@ export default function CertificatesDashboard() {
         </div>
 
         {/* Tabs Navigation */}
-        <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="overview">Vista General</TabsTrigger>
-            <TabsTrigger value="generator">Generar</TabsTrigger>
-            <TabsTrigger value="templates">Plantillas</TabsTrigger>
-            <TabsTrigger value="history">Historial</TabsTrigger>
-            <TabsTrigger value="settings">Configuración</TabsTrigger>
+        <Tabs defaultValue='overview' className='space-y-6'>
+          <TabsList className='grid w-full grid-cols-5'>
+            <TabsTrigger value='overview'>Vista General</TabsTrigger>
+            <TabsTrigger value='generator'>Generar</TabsTrigger>
+            <TabsTrigger value='templates'>Plantillas</TabsTrigger>
+            <TabsTrigger value='history'>Historial</TabsTrigger>
+            <TabsTrigger value='settings'>Configuración</TabsTrigger>
           </TabsList>
 
           {/* Vista General */}
-          <TabsContent value="overview" className="space-y-6">
-            <div className="grid gap-6">
+          <TabsContent value='overview' className='space-y-6'>
+            <div className='grid gap-6'>
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Award className="h-5 w-5" />
+                  <CardTitle className='flex items-center gap-2'>
+                    <Award className='h-5 w-5' />
                     Mis Certificados
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
+                  <div className='space-y-4'>
                     {certificatesData.certificates.map((cert) => (
-                      <div key={cert.id} className="flex items-center justify-between p-4 border rounded-lg">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
-                            <h3 className="font-semibold">{cert.title}</h3>
-                            <Badge className={getStatusColor(cert.status)}>{cert.status}</Badge>
-                            <Badge className={getTypeColor(cert.type)}>{cert.type}</Badge>
+                      <div
+                        key={cert.id}
+                        className='flex items-center justify-between p-4 border rounded-lg'>
+                        <div className='flex-1'>
+                          <div className='flex items-center gap-3 mb-2'>
+                            <h3 className='font-semibold'>{cert.title}</h3>
+                            <Badge className={getStatusColor(cert.status)}>
+                              {cert.status}
+                            </Badge>
+                            <Badge className={getTypeColor(cert.type)}>
+                              {cert.type}
+                            </Badge>
                           </div>
-                          <p className="text-sm text-muted-foreground mb-1">{cert.event}</p>
-                          <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                            <span className="flex items-center gap-1">
-                              <Calendar className="h-3 w-3" />
+                          <p className='text-sm text-muted-foreground mb-1'>
+                            {cert.event}
+                          </p>
+                          <div className='flex items-center gap-4 text-xs text-muted-foreground'>
+                            <span className='flex items-center gap-1'>
+                              <Calendar className='h-3 w-3' />
                               {cert.date}
                             </span>
-                            <span className="flex items-center gap-1">
-                              <Clock className="h-3 w-3" />
+                            <span className='flex items-center gap-1'>
+                              <Clock className='h-3 w-3' />
                               {cert.hours}h
                             </span>
-                            <span className="flex items-center gap-1">
-                              <Download className="h-3 w-3" />
+                            <span className='flex items-center gap-1'>
+                              <Download className='h-3 w-3' />
                               {cert.downloads} descargas
                             </span>
                           </div>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className='flex items-center gap-2'>
                           <Button
-                            variant="outline"
-                            size="sm"
+                            variant='outline'
+                            size='sm'
                             onClick={() => {
-                              setSelectedCertificate(cert)
-                              setShowPreview(true)
-                            }}
-                          >
-                            <Eye className="h-4 w-4" />
+                              setSelectedCertificate(cert);
+                              setShowPreview(true);
+                            }}>
+                            <Eye className='h-4 w-4' />
                           </Button>
-                          <Button variant="outline" size="sm" disabled={cert.status === "pendiente"}>
-                            <Download className="h-4 w-4" />
+                          <Button
+                            variant='outline'
+                            size='sm'
+                            disabled={cert.status === "pendiente"}>
+                            <Download className='h-4 w-4' />
                           </Button>
-                          <Button variant="outline" size="sm" disabled={cert.status === "pendiente"}>
-                            <Share2 className="h-4 w-4" />
+                          <Button
+                            variant='outline'
+                            size='sm'
+                            disabled={cert.status === "pendiente"}>
+                            <Share2 className='h-4 w-4' />
                           </Button>
                         </div>
                       </div>
@@ -240,28 +270,30 @@ export default function CertificatesDashboard() {
           </TabsContent>
 
           {/* Generar Certificado */}
-          <TabsContent value="generator">
+          <TabsContent value='generator'>
             <CertificateGenerator />
           </TabsContent>
 
           {/* Plantillas */}
-          <TabsContent value="templates">
+          <TabsContent value='templates'>
             <CertificateTemplates />
           </TabsContent>
 
           {/* Historial */}
-          <TabsContent value="history">
+          <TabsContent value='history'>
             <CertificateHistory />
           </TabsContent>
 
           {/* Configuración */}
-          <TabsContent value="settings" className="space-y-6">
+          <TabsContent value='settings' className='space-y-6'>
             <Card>
               <CardHeader>
                 <CardTitle>Configuración de Certificados</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-muted-foreground">Configuración avanzada disponible próximamente.</p>
+              <CardContent className='space-y-4'>
+                <p className='text-muted-foreground'>
+                  Configuración avanzada disponible próximamente.
+                </p>
               </CardContent>
             </Card>
           </TabsContent>
@@ -270,8 +302,11 @@ export default function CertificatesDashboard() {
 
       {/* Modal de Vista Previa */}
       {showPreview && selectedCertificate && (
-        <CertificatePreview certificate={selectedCertificate} onClose={() => setShowPreview(false)} />
+        <CertificatePreview
+          certificate={selectedCertificate}
+          onClose={() => setShowPreview(false)}
+        />
       )}
     </div>
-  )
+  );
 }

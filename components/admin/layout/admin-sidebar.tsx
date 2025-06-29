@@ -24,6 +24,7 @@ import {
   HelpCircle,
   LogOut,
   Home,
+  File,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
@@ -60,8 +61,9 @@ const menuItems = [
         icon: FileText,
         badge: "23",
       },
-      { name: "Pagos", href: "/dashboard/pagos", icon: CreditCard },
-      { name: "Certificados", href: "/dashboard/certificados", icon: Award },
+      { name: "Pagos", href: "/dashboard/payments", icon: CreditCard },
+      { name: "Certificados", href: "/dashboard/certificates", icon: Award },
+      { name: "Posters", href: "/dashboard/posters", icon: File },
     ],
   },
   {
