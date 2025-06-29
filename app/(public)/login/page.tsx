@@ -15,15 +15,13 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2, AlertCircle } from "lucide-react";
-import Link from "next/link";
 
 export default function LoginPage() {
-  // Hooks para la navegación y el contexto de autenticación
   const router = useRouter();
   const auth = useAuth();
 
-  // Estados para manejar el formulario
-  const [email, setEmail] = useState("");
+  // --- CAMBIO 1: El estado ahora es para 'id' en lugar de 'email' ---
+  const [id, setId] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -34,30 +32,25 @@ export default function LoginPage() {
     setError(null);
 
     try {
+      // --- CAMBIO 2: Enviamos 'id' en el body de la petición ---
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/login`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password }),
+          body: JSON.stringify({ id, password }),
         }
       );
 
       const data = await response.json();
-
       if (!response.ok) {
         throw new Error(data.message || "Error en el inicio de sesión.");
       }
 
-      // Si la respuesta es exitosa, el backend nos devuelve un token.
-      // Usamos la función login de nuestro AuthContext.
       auth.login(data.token);
-
-      // Redirigimos al panel principal del backoffice
-      router.push("/"); // O a '/dashboard', según tu estructura
+      router.push("/");
     } catch (err: any) {
       setError(err.message);
-      console.error(err);
     } finally {
       setIsSubmitting(false);
     }
@@ -74,22 +67,22 @@ export default function LoginPage() {
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent className='space-y-4'>
-            {/* Mensaje de error si existe */}
             {error && (
               <div className='flex items-center gap-2 rounded-lg border border-red-300 bg-red-50 p-3 text-sm text-red-800'>
                 <AlertCircle className='h-5 w-5 flex-shrink-0' />
                 {error}
               </div>
             )}
+            {/* --- CAMBIO 3: El formulario ahora pide el ID (DNI/NIE) --- */}
             <div className='space-y-2'>
-              <Label htmlFor='email'>Email</Label>
+              <Label htmlFor='id'>ID (DNI / NIE)</Label>
               <Input
-                id='email'
-                type='email'
-                placeholder='admin@ejemplo.com'
+                id='id'
+                type='text'
+                placeholder='12345678A'
                 required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={id}
+                onChange={(e) => setId(e.target.value)}
                 disabled={isSubmitting}
               />
             </div>
